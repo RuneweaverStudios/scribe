@@ -1,0 +1,7 @@
+{
+  "name": "Scribe",
+  "author": "OpenClaw",
+  "version": "1.0.0",
+  "description": "Scans OpenClaw logs, config files, chat history, cursor history, behavior, desires, tastes, and drafts to take comprehensive daily and weekly notes with summaries.",
+  "main": "scripts/scribe.py"
+}

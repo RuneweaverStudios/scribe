@@ -5,7 +5,13 @@
   "displayName": "Scribe",
   "description": "Scans OpenClaw logs, config files, chat history, cursor history, behavior, desires, tastes, and drafts to take comprehensive daily and weekly notes with summaries.",
   "author": "OpenClaw",
-  "tags": [],
+  "tags": [
+    "note-taking",
+    "logging",
+    "documentation",
+    "scanning",
+    "productivity"
+  ],
   "platform": "openclaw",
   "main": "scripts/scribe.py"
 }

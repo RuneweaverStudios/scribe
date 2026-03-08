@@ -1,0 +1,19 @@
+{
+  "scan_depth": {
+    "drafts_max_depth": 5,
+    "memory_days_back": 7
+  },
+  "paths": {
+    "notes_subdir": "Notes",
+    "daily_subdir": "daily",
+    "weekly_subdir": "weekly",
+    "memory_subdir": "memory"
+  },
+  "limits": {
+    "max_errors_displayed": 10,
+    "max_warnings_displayed": 10,
+    "message_preview_length": 500,
+    "content_preview_length": 2000,
+    "draft_preview_length": 1000
+  }
+}

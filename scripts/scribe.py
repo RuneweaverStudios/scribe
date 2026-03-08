@@ -85,6 +85,10 @@ class Scribe:
                         else:
                             log_time = None
                         
+                        # Skip lines older than the cutoff time
+                        if log_time is not None and log_time < cutoff_time:
+                            continue
+
                         # Categorize log entries
                         line_lower = line.lower()
                         if 'error' in line_lower or 'exception' in line_lower or 'traceback' in line_lower:
@@ -318,10 +322,14 @@ class Scribe:
         
         return memory_data
     
-    def scan_drafts(self) -> List[Dict[str, Any]]:
-        """Scan for draft files (tweets, blog posts, etc.)."""
+    def scan_drafts(self, max_depth: int = 5) -> List[Dict[str, Any]]:
+        """Scan for draft files (tweets, blog posts, etc.).
+
+        Args:
+            max_depth: Maximum directory depth to recurse into (default 5).
+        """
         drafts = []
-        
+
         # Check workspace for draft files
         draft_patterns = [
             "**/*draft*.txt",
@@ -329,21 +337,29 @@ class Scribe:
             "**/blog/**/*.md",
             "**/tweet*.txt"
         ]
-        
+
         for pattern in draft_patterns:
             for draft_file in self.workspace_dir.glob(pattern):
+                # Enforce max depth relative to workspace_dir
+                try:
+                    rel = draft_file.relative_to(self.workspace_dir)
+                except ValueError:
+                    continue
+                if len(rel.parts) > max_depth:
+                    continue
+
                 try:
                     with open(draft_file, 'r', encoding='utf-8') as f:
                         content = f.read()
                         drafts.append({
-                            "path": str(draft_file.relative_to(self.workspace_dir)),
+                            "path": str(rel),
                             "content": content[:1000],  # Truncate
                             "size": len(content),
                             "modified": datetime.fromtimestamp(draft_file.stat().st_mtime).isoformat()
                         })
                 except Exception as e:
                     print(f"Scribe: error reading draft {draft_file}: {e}", file=sys.stderr)
-        
+
         return drafts
     
     def scan_behavior_files(self) -> Dict[str, Any]:

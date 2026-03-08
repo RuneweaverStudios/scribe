@@ -27,16 +27,32 @@ class Scribe:
         self.weekly_notes_dir = self.notes_dir / "weekly"
         self.memory_dir = self.workspace_dir / "memory"
         self.config_path = openclaw_home / "openclaw.json"
-        self.cursor_storage = Path.home() / "Library" / "Application Support" / "Cursor" / "User"
+        self.cursor_storage = self._detect_cursor_storage()
         self.global_db = self.cursor_storage / "globalStorage" / "state.vscdb"
         self.workspace_storage = self.cursor_storage / "workspaceStorage"
-        
+
         # Ensure directories exist
         self.notes_dir.mkdir(parents=True, exist_ok=True)
         self.daily_notes_dir.mkdir(parents=True, exist_ok=True)
         self.weekly_notes_dir.mkdir(parents=True, exist_ok=True)
         self.memory_dir.mkdir(parents=True, exist_ok=True)
-        
+
+    @staticmethod
+    def _detect_cursor_storage() -> Path:
+        """Detect the Cursor storage path based on platform."""
+        import platform
+        cursor_storage_env = os.environ.get("CURSOR_STORAGE_PATH")
+        if cursor_storage_env:
+            return Path(cursor_storage_env)
+        system = platform.system()
+        if system == "Darwin":
+            return Path.home() / "Library" / "Application Support" / "Cursor" / "User"
+        elif system == "Linux":
+            return Path.home() / ".config" / "Cursor" / "User"
+        elif system == "Windows":
+            return Path(os.environ.get("APPDATA", "")) / "Cursor" / "User"
+        return Path.home() / "Library" / "Application Support" / "Cursor" / "User"
+
     def scan_logs(self, days_back: int = 1) -> Dict[str, Any]:
         """Scan OpenClaw logs for activity patterns."""
         log_data = {

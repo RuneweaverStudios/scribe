@@ -77,10 +77,10 @@ class Scribe:
                         if timestamp_match:
                             try:
                                 log_time = datetime.strptime(timestamp_match.group(1), '%Y-%m-%d %H:%M:%S')
-                            except:
+                            except Exception:
                                 try:
                                     log_time = datetime.strptime(timestamp_match.group(1), '%Y-%m-%dT%H:%M:%S')
-                                except:
+                                except Exception:
                                     log_time = None
                         else:
                             log_time = None
@@ -191,13 +191,13 @@ class Scribe:
                                         all_messages.append(msg)
                         elif isinstance(value, dict) and 'messages' in value:
                             all_messages.extend(self._extract_messages_from_conversation(value, cutoff_time))
-                    except:
-                        pass
-                
+                    except Exception as e:
+                        print(f"Scribe: error parsing chat row: {e}", file=sys.stderr)
+
                 conn.close()
             except Exception as e:
-                pass
-        
+                print(f"Scribe: error reading global DB: {e}", file=sys.stderr)
+
         # Try workspace-specific databases
         if self.workspace_storage.exists():
             for workspace_dir in self.workspace_storage.iterdir():
@@ -216,12 +216,12 @@ class Scribe:
                                 value = json.loads(row['value'])
                                 if isinstance(value, dict) and 'messages' in value:
                                     all_messages.extend(self._extract_messages_from_conversation(value, cutoff_time))
-                            except:
-                                pass
-                        
+                            except Exception as e:
+                                print(f"Scribe: error parsing workspace chat row: {e}", file=sys.stderr)
+
                         conn.close()
-                    except:
-                        pass
+                    except Exception as e:
+                        print(f"Scribe: error reading workspace DB: {e}", file=sys.stderr)
         
         return all_messages
     
@@ -257,8 +257,8 @@ class Scribe:
                     msg_time = datetime.fromisoformat(str(timestamp).replace('Z', '+00:00'))
                 if msg_time < cutoff_time:
                     return None
-            except:
-                pass
+            except Exception as e:
+                print(f"Scribe: error parsing message timestamp: {e}", file=sys.stderr)
         
         # Extract role and content
         role = msg.get('role', msg.get('author', 'unknown'))
@@ -341,8 +341,8 @@ class Scribe:
                             "size": len(content),
                             "modified": datetime.fromtimestamp(draft_file.stat().st_mtime).isoformat()
                         })
-                except:
-                    pass
+                except Exception as e:
+                    print(f"Scribe: error reading draft {draft_file}: {e}", file=sys.stderr)
         
         return drafts
     
@@ -372,8 +372,8 @@ class Scribe:
                                 "content": content[:2000],
                                 "size": len(content)
                             }
-                    except:
-                        pass
+                    except Exception as e:
+                        print(f"Scribe: error reading behavior file {file_path}: {e}", file=sys.stderr)
         
         return behavior_data
     
